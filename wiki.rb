@@ -1,4 +1,5 @@
 require 'sinatra'
+require 'uri'
 
 def page_content(title)
   File.read("pages/#{title}.txt")
@@ -7,25 +8,37 @@ rescue Errno::ENOENT
 end
 
 def save_content(title, content)
-  File.open("pages/#{title}.txt", "w") do |file|
+  File.open("pages/#{title}.txt", 'w') do |file|
     file.print(content)
   end
 end
 
-get"/" do
+get'/' do
   erb :welcome
 end
 
-get "/new" do
+get '/new' do
   erb :new
 end
 
-post "/create" do
-  'placeholder post text'
+post '/create' do
+  save_content(params['title'], params['content'])
+  redirect URI.escape("/#{params['title']}")
 end
 
-get "/:title" do
+get '/:title' do
   @title = params[:title]
   @content = page_content(@title)
   erb :show
+end
+
+get '/:title/edit' do
+  @title = params[:title]
+  @content = page_content(@title)
+  erb :edit
+end
+
+put '/:title' do
+  save_content(params['title'], params['context'])
+  redirect URI.escape("/#{params['title']}")
 end
